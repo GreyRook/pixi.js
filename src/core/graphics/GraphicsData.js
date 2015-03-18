@@ -6,12 +6,15 @@
  * @param lineWidth {number} the width of the line to draw
  * @param lineColor {number} the color of the line to draw
  * @param lineAlpha {number} the alpha of the line to draw
+ * @param lineBitmap {PIXI.Texture} the texture of the line to draw
+ * @param lineBitmapMatrix {PIXI.Matrix} the transformation matrix for lineBitmap
+ * @param lineBitmapRepeat {boolean} wether or not the lineBitmap should be tiled
  * @param fillColor {number} the color of the fill
  * @param fillAlpha {number} the alpha of the fill
  * @param fill      {boolean} whether or not the shape is filled with a colour
  * @param shape     {Circle|Rectangle|Ellipse|Line|Polygon} The shape object to draw.
  */
-function GraphicsData(lineWidth, lineColor, lineAlpha, fillColor, fillAlpha, fill, shape)
+function GraphicsData(lineWidth, lineColor, lineAlpha, lineBitmap, lineBitmapMatrix, lineBitmapRepeat, fillColor, fillAlpha, fill, shape)
 {
     /* 
      * @member {number} the width of the line to draw
@@ -30,8 +33,19 @@ function GraphicsData(lineWidth, lineColor, lineAlpha, fillColor, fillAlpha, fil
      * @member {number} cached tint of the line to draw
      */
     this._lineTint = lineColor;
-
-    /* 
+    /*
+     * @member lineBitmap {PIXI.Texture} the texture of the line to draw
+     */
+    this.lineBitmap = lineBitmap;
+    /*
+     * @member lineBitmapMatrix {PIXI.Matrix} the transformation matrix for lineBitmap
+     */
+    this.lineBitmapMatrix = lineBitmapMatrix;
+    /*
+     * @member lineBitmapRepeat {boolean} wether or not the lineBitmap should be tiled
+     */
+    this.lineBitmapRepeat = lineBitmapRepeat;
+    /*
      * @member {number} the color of the fill
      */
     this.fillColor = fillColor;

@@ -7,6 +7,17 @@ var CONST = require('../../../const');
  */
 var CanvasGraphics = module.exports = {};
 
+
+/*
+ *
+ */
+CanvasGraphics.getFill = function(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat) {
+    if (lineBitmap) {
+        return context.createPattern(lineBitmap.baseTexture.source, lineBitmapRepeat ? 'repeat' : 'no-repeat');
+    }
+    return '#' + ('00000' + ( lineColor | 0).toString(16)).substr(-6);
+};
+
 /*
  * Renders a Graphics object to a canvas.
  *
@@ -30,6 +41,9 @@ CanvasGraphics.renderGraphics = function (graphics, context)
 
         var fillColor = data._fillTint;
         var lineColor = data._lineTint;
+        var lineBitmap = data.lineBitmap;
+        var lineBitmapMatrix = data.lineBitmapMatrix;
+        var lineBitmapRepeat = data.lineBitmapRepeat;
 
         context.lineWidth = data.lineWidth;
 
@@ -66,7 +80,7 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             if (data.lineWidth)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
-                context.strokeStyle = '#' + ('00000' + ( lineColor | 0).toString(16)).substr(-6);
+                context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
                 context.stroke();
             }
         }
@@ -83,7 +97,7 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             if (data.lineWidth)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
-                context.strokeStyle = '#' + ('00000' + ( lineColor | 0).toString(16)).substr(-6);
+                context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
                 context.strokeRect(shape.x, shape.y, shape.width, shape.height);
             }
         }
@@ -103,7 +117,7 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             if (data.lineWidth)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
-                context.strokeStyle = '#' + ('00000' + ( lineColor | 0).toString(16)).substr(-6);
+                context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
                 context.stroke();
             }
         }
@@ -144,7 +158,7 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             if (data.lineWidth)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
-                context.strokeStyle = '#' + ('00000' + ( lineColor | 0).toString(16)).substr(-6);
+                context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
                 context.stroke();
             }
         }
@@ -181,7 +195,7 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             if (data.lineWidth)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
-                context.strokeStyle = '#' + ('00000' + ( lineColor | 0).toString(16)).substr(-6);
+                context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
                 context.stroke();
             }
         }

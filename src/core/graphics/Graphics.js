@@ -45,6 +45,31 @@ function Graphics()
     this.lineColor = 0;
 
     /**
+     * the texture of the line to draw
+     *
+     * @member lineBitmap {PIXI.Texture}
+     * @default null
+     */
+    this.lineBitmap = null;
+
+    /**
+     * the transformation matrix for lineBitmap
+     *
+     * @member lineBitmapMatrix {PIXI.Matrix}
+     * @default null
+     */
+    this.lineBitmapMatrix = null;
+
+    /**
+     * wether or not the lineBitmap should be tiled
+     *
+     * @member lineBitmapRepeat {boolean}
+     * @default true
+     */
+    this.lineBitmapRepeat = true;
+
+
+    /**
      * Graphics data
      *
      * @member {GraphicsData[]}
@@ -225,6 +250,42 @@ Graphics.prototype.lineStyle = function (lineWidth, color, alpha)
             this.currentPath.lineWidth = this.lineWidth;
             this.currentPath.lineColor = this.lineColor;
             this.currentPath.lineAlpha = this.lineAlpha;
+        }
+    }
+
+    return this;
+};
+
+
+/**
+ * Specifies the line style used for subsequent calls to Graphics methods such as the lineTo() method or the drawCircle() method.
+ *
+ * Use lineStyle to specify stroke width
+ *
+ * @return {Graphics}
+ * @param bitmap {PIXI.Texture} the texture to fill
+ * @param matrix {PIXI.Matrix} transformation matrix
+ * @param repeat {boolean} wether the bitmap should be tiled
+ */
+Graphics.prototype.lineBitmapStyle = function (bitmap, matrix, repeat)
+{
+    this.lineBitmap = bitmap;
+    this.lineBitmapMatrix = matrix || math.Matrix.IDENTITY;
+    this.lineBitmapRepeat = (arguments.length < 3) ? true: repeat;
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length)
+        {
+            // halfway through a line? start a new one!
+            this.drawShape( new math.Polygon( this.currentPath.shape.points.slice(-2) ));
+        }
+        else
+        {
+            // otherwise its empty so lets just set the line properties
+            this.currentPath.lineBitmap = this.lineBitmap;
+            this.currentPath.lineBitmapMatrix = this.lineBitmapMatrix;
+            this.currentPath.lineBitmapRepeat = this.lineBitmapRepeat;
         }
     }
 
@@ -1119,7 +1180,9 @@ Graphics.prototype.drawShape = function (shape)
 
     this.currentPath = null;
 
-    var data = new GraphicsData(this.lineWidth, this.lineColor, this.lineAlpha, this.fillColor, this.fillAlpha, this.filling, shape);
+    var data = new GraphicsData(this.lineWidth, this.lineColor, this.lineAlpha,
+                                this.lineBitmap, this.lineBitmapMatrix, this.lineBitmapRepeat,
+                                this.fillColor, this.fillAlpha, this.filling, shape);
 
     this.graphicsData.push(data);
 
