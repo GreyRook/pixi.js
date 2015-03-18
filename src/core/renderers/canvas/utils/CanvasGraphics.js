@@ -81,7 +81,14 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
                 context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
+                if(lineBitmapMatrix) {
+                    context.save();
+                    context.transform(lineBitmapMatrix.a, lineBitmapMatrix.b, lineBitmapMatrix.c, lineBitmapMatrix.d, lineBitmapMatrix.tx, lineBitmapMatrix.ty);
+                }
                 context.stroke();
+                if (lineBitmapMatrix) {
+                    context.restore();
+                }
             }
         }
         else if (data.type === CONST.SHAPES.RECT)
@@ -98,7 +105,15 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
                 context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
+
+                if(lineBitmapMatrix) {
+                    context.save();
+                    context.transform(lineBitmapMatrix.a, lineBitmapMatrix.b, lineBitmapMatrix.c, lineBitmapMatrix.d, lineBitmapMatrix.tx, lineBitmapMatrix.ty);
+                }
                 context.strokeRect(shape.x, shape.y, shape.width, shape.height);
+                if (lineBitmapMatrix) {
+                    context.restore();
+                }
             }
         }
         else if (data.type === CONST.SHAPES.CIRC)
@@ -118,7 +133,14 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
                 context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
+                if(lineBitmapMatrix) {
+                    context.save();
+                    context.transform(lineBitmapMatrix.a, lineBitmapMatrix.b, lineBitmapMatrix.c, lineBitmapMatrix.d, lineBitmapMatrix.tx, lineBitmapMatrix.ty);
+                }
                 context.stroke();
+                if (lineBitmapMatrix) {
+                    context.restore();
+                }
             }
         }
         else if (data.type === CONST.SHAPES.ELIP)
@@ -159,7 +181,14 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
                 context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
+                if(lineBitmapMatrix) {
+                    context.save();
+                    context.transform(lineBitmapMatrix.a, lineBitmapMatrix.b, lineBitmapMatrix.c, lineBitmapMatrix.d, lineBitmapMatrix.tx, lineBitmapMatrix.ty);
+                }
                 context.stroke();
+                if (lineBitmapMatrix) {
+                    context.restore();
+                }
             }
         }
         else if (data.type === CONST.SHAPES.RREC)
@@ -196,7 +225,14 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
                 context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
+                if(lineBitmapMatrix) {
+                    context.save();
+                    context.transform(lineBitmapMatrix.a, lineBitmapMatrix.b, lineBitmapMatrix.c, lineBitmapMatrix.d, lineBitmapMatrix.tx, lineBitmapMatrix.ty);
+                }
                 context.stroke();
+                if (lineBitmapMatrix) {
+                    context.restore();
+                }
             }
         }
     }
