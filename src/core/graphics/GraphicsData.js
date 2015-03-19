@@ -14,22 +14,22 @@
  * @param fill      {boolean} whether or not the shape is filled with a colour
  * @param shape     {Circle|Rectangle|Ellipse|Line|Polygon} The shape object to draw.
  */
-function GraphicsData(lineWidth, lineColor, lineAlpha, lineBitmap, lineBitmapMatrix, lineBitmapRepeat, fillColor, fillAlpha, fill, shape)
+function GraphicsData(lineWidth, lineColor, lineAlpha, lineBitmap, lineBitmapMatrix, lineBitmapRepeat, fillColor, fillAlpha, fillBitmap, fillBitmapMatrix, fillBitmapRepeat, fill, shape)
 {
-    /* 
+    /*
      * @member {number} the width of the line to draw
      */
     this.lineWidth = lineWidth;
 
-    /* 
+    /*
      * @member {number} the color of the line to draw
      */
     this.lineColor = lineColor;
-    /* 
+    /*
      * @member {number} the alpha of the line to draw
      */
     this.lineAlpha = lineAlpha;
-    /* 
+    /*
      * @member {number} cached tint of the line to draw
      */
     this._lineTint = lineColor;
@@ -50,28 +50,43 @@ function GraphicsData(lineWidth, lineColor, lineAlpha, lineBitmap, lineBitmapMat
      */
     this.fillColor = fillColor;
 
-    /* 
+    /*
      * @member {number} the alpha of the fill
      */
     this.fillAlpha = fillAlpha;
 
-    /* 
+    /*
      * @member {number} cached tint of the fill
      */
     this._fillTint = fillColor;
 
-    /* 
+    /*
      * @member {boolean} whether or not the shape is filled with a colour
      */
     this.fill = fill;
 
-    /* 
+    /*
+     * @member fillBitmap {PIXI.Texture} the texture of the fill
+     */
+    this.fillBitmap = fillBitmap;
+
+    /*
+     * @member fillBitmapMatrix {PIXI.Matrix} the transformation matrix for fillBitmap
+     */
+    this.fillBitmapMatrix = fillBitmapMatrix;
+
+    /*
+     * @member fillBitmapRepeat {boolean} wether or not the fillBitmap should be repeated
+     */
+    this.fillBitmapRepeat = fillBitmapRepeat;
+
+    /*
      * @member {Circle|Rectangle|Ellipse|Line|Polygon} The shape object to draw.
      */
     this.shape = shape;
 
-    /* 
-     * @member {number} The type of the shape, see the Const.Shapes file for all the existing types, 
+    /*
+     * @member {number} The type of the shape, see the Const.Shapes file for all the existing types,
      */
     this.type = shape.type;
 }
@@ -90,9 +105,15 @@ GraphicsData.prototype.clone = function ()
         this.lineWidth,
         this.lineColor,
         this.lineAlpha,
+        this.lineBitmap,
+        this.lineBitmapMatrix,
+        this.lineBitmapRepeat,
         this.fillColor,
         this.fillAlpha,
         this.fill,
+        this.fillBitmap,
+        this.fillBitmapMatrix,
+        this.fillBitmapRepeat,
         this.shape
     );
 };
