@@ -223,16 +223,22 @@ Graphics.prototype.clone = function ()
 {
     var clone = new Graphics();
 
-    clone.renderable    = this.renderable;
-    clone.fillAlpha     = this.fillAlpha;
-    clone.lineWidth     = this.lineWidth;
-    clone.lineColor     = this.lineColor;
-    clone.tint          = this.tint;
-    clone.blendMode     = this.blendMode;
-    clone.isMask        = this.isMask;
-    clone.boundsPadding = this.boundsPadding;
-    clone.dirty         = this.dirty;
-    clone.glDirty       = this.glDirty;
+    clone.renderable        = this.renderable;
+    clone.fillAlpha         = this.fillAlpha;
+    clone.lineWidth         = this.lineWidth;
+    clone.lineColor         = this.lineColor;
+    clone.lineBitmap        = this.lineBitmap;
+    clone.lineBitmapMatrix  = this.lineBitmapMatrix;
+    clone.lineBitmapRepeat  = this.lineBitmapRepeat;
+    clone.fillBitmap        = this.fillBitmap;
+    clone.fillBitmapMatrix  = this.fillBitmapMatrix;
+    clone.fillBitmapRepeat  = this.fillBitmapRepeat;
+    clone.tint              = this.tint;
+    clone.blendMode         = this.blendMode;
+    clone.isMask            = this.isMask;
+    clone.boundsPadding     = this.boundsPadding;
+    clone.dirty             = this.dirty;
+    clone.glDirty           = this.glDirty;
     clone.cachedSpriteDirty = this.cachedSpriteDirty;
 
     // copy graphics data
