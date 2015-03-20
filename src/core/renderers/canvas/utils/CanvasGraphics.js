@@ -11,11 +11,11 @@ var CanvasGraphics = module.exports = {};
 /*
  *
  */
-CanvasGraphics.getFill = function(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat) {
-    if (lineBitmap) {
-        return context.createPattern(lineBitmap.baseTexture.source, lineBitmapRepeat ? 'repeat' : 'no-repeat');
+CanvasGraphics.getFill = function(context, color, bitmap, matrix, repeat) {
+    if (bitmap) {
+        return context.createPattern(bitmap.baseTexture.source, repeat ? 'repeat' : 'no-repeat');
     }
-    return '#' + ('00000' + ( lineColor | 0).toString(16)).substr(-6);
+    return '#' + ('00000' + ( color | 0).toString(16)).substr(-6);
 };
 
 /*
@@ -44,6 +44,10 @@ CanvasGraphics.renderGraphics = function (graphics, context)
         var lineBitmap = data.lineBitmap;
         var lineBitmapMatrix = data.lineBitmapMatrix;
         var lineBitmapRepeat = data.lineBitmapRepeat;
+        var fillBitmap = data.fillBitmap;
+        var fillBitmapMatrix = data.fillBitmapMatrix;
+        var fillBitmapRepeat = data.fillBitmapRepeat;
+
 
         context.lineWidth = data.lineWidth;
 
@@ -74,8 +78,15 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             if (data.fill)
             {
                 context.globalAlpha = data.fillAlpha * worldAlpha;
-                context.fillStyle = '#' + ('00000' + ( fillColor | 0).toString(16)).substr(-6);
+                context.fillStyle = this.getFill(context, fillColor, fillBitmap, fillBitmapMatrix, fillBitmapRepeat);
+                if (fillBitmapMatrix) {
+                    context.save();
+                    context.transform(fillBitmapMatrix.a, fillBitmapMatrix.b, fillBitmapMatrix.c, fillBitmapMatrix.d, fillBitmapMatrix.tx, fillBitmapMatrix.ty);
+                }
                 context.fill();
+                if (fillBitmapMatrix) {
+                    context.restore();
+                }
             }
             if (data.lineWidth)
             {
@@ -94,12 +105,18 @@ CanvasGraphics.renderGraphics = function (graphics, context)
         else if (data.type === CONST.SHAPES.RECT)
         {
 
-            if (data.fillColor || data.fillColor === 0)
+            if (data.fill)
             {
                 context.globalAlpha = data.fillAlpha * worldAlpha;
-                context.fillStyle = '#' + ('00000' + ( fillColor | 0).toString(16)).substr(-6);
+                context.fillStyle = this.getFill(context, fillColor, fillBitmap, fillBitmapMatrix, fillBitmapRepeat);
+                if (fillBitmapMatrix) {
+                    context.save();
+                    context.transform(fillBitmapMatrix.a, fillBitmapMatrix.b, fillBitmapMatrix.c, fillBitmapMatrix.d, fillBitmapMatrix.tx, fillBitmapMatrix.ty);
+                }
                 context.fillRect(shape.x, shape.y, shape.width, shape.height);
-
+                if (fillBitmapMatrix) {
+                    context.restore();
+                }
             }
             if (data.lineWidth)
             {
@@ -126,8 +143,15 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             if (data.fill)
             {
                 context.globalAlpha = data.fillAlpha * worldAlpha;
-                context.fillStyle = '#' + ('00000' + ( fillColor | 0).toString(16)).substr(-6);
+                context.fillStyle = this.getFill(context, fillColor, fillBitmap, fillBitmapMatrix, fillBitmapRepeat);
+                if (fillBitmapMatrix) {
+                    context.save();
+                    context.transform(fillBitmapMatrix.a, fillBitmapMatrix.b, fillBitmapMatrix.c, fillBitmapMatrix.d, fillBitmapMatrix.tx, fillBitmapMatrix.ty);
+                }
                 context.fill();
+                if (fillBitmapMatrix) {
+                    context.restore();
+                }
             }
             if (data.lineWidth)
             {
@@ -174,8 +198,15 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             if (data.fill)
             {
                 context.globalAlpha = data.fillAlpha * worldAlpha;
-                context.fillStyle = '#' + ('00000' + ( fillColor | 0).toString(16)).substr(-6);
+                context.fillStyle = this.getFill(context, fillColor, fillBitmap, fillBitmapMatrix, fillBitmapRepeat);
+                if (fillBitmapMatrix) {
+                    context.save();
+                    context.transform(fillBitmapMatrix.a, fillBitmapMatrix.b, fillBitmapMatrix.c, fillBitmapMatrix.d, fillBitmapMatrix.tx, fillBitmapMatrix.ty);
+                }
                 context.fill();
+                if (fillBitmapMatrix) {
+                    context.restore();
+                }
             }
             if (data.lineWidth)
             {
@@ -214,12 +245,18 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             context.quadraticCurveTo(rx, ry, rx, ry + radius);
             context.closePath();
 
-            if (data.fillColor || data.fillColor === 0)
+            if (data.fill)
             {
                 context.globalAlpha = data.fillAlpha * worldAlpha;
-                context.fillStyle = '#' + ('00000' + ( fillColor | 0).toString(16)).substr(-6);
+                context.fillStyle = this.getFill(context, fillColor, fillBitmap, fillBitmapMatrix, fillBitmapRepeat);
+                if (fillBitmapMatrix) {
+                    context.save();
+                    context.transform(fillBitmapMatrix.a, fillBitmapMatrix.b, fillBitmapMatrix.c, fillBitmapMatrix.d, fillBitmapMatrix.tx, fillBitmapMatrix.ty);
+                }
                 context.fill();
-
+                if (fillBitmapMatrix) {
+                    context.restore();
+                }
             }
             if (data.lineWidth)
             {
@@ -348,7 +385,7 @@ CanvasGraphics.renderGraphicsMask = function (graphics, context)
  *
  * @private
  * @param graphics {Graphics} the graphics that will have its tint updated
- * 
+ *
  */
 CanvasGraphics.updateGraphicsTint = function (graphics)
 {

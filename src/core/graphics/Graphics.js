@@ -69,6 +69,31 @@ function Graphics()
     this.lineBitmapRepeat = true;
 
 
+     /**
+     * the texture of the fill
+     *
+     * @member fillBitmap {PIXI.Texture}
+     * @default null
+     */
+    this.fillBitmap = null;
+
+    /**
+     * the transformation matrix for fillBitmap
+     *
+     * @member fillBitmapMatrix {PIXI.Matrix}
+     * @default null
+     */
+    this.fillBitmapMatrix = null;
+
+    /**
+     * wether or not the fillBitmap should be repeated
+     *
+     * @member fillBitmapRepeat {boolean}
+     * @default true
+     */
+    this.fillBitmapRepeat = true;
+
+
     /**
      * Graphics data
      *
@@ -198,16 +223,22 @@ Graphics.prototype.clone = function ()
 {
     var clone = new Graphics();
 
-    clone.renderable    = this.renderable;
-    clone.fillAlpha     = this.fillAlpha;
-    clone.lineWidth     = this.lineWidth;
-    clone.lineColor     = this.lineColor;
-    clone.tint          = this.tint;
-    clone.blendMode     = this.blendMode;
-    clone.isMask        = this.isMask;
-    clone.boundsPadding = this.boundsPadding;
-    clone.dirty         = this.dirty;
-    clone.glDirty       = this.glDirty;
+    clone.renderable        = this.renderable;
+    clone.fillAlpha         = this.fillAlpha;
+    clone.lineWidth         = this.lineWidth;
+    clone.lineColor         = this.lineColor;
+    clone.lineBitmap        = this.lineBitmap;
+    clone.lineBitmapMatrix  = this.lineBitmapMatrix;
+    clone.lineBitmapRepeat  = this.lineBitmapRepeat;
+    clone.fillBitmap        = this.fillBitmap;
+    clone.fillBitmapMatrix  = this.fillBitmapMatrix;
+    clone.fillBitmapRepeat  = this.fillBitmapRepeat;
+    clone.tint              = this.tint;
+    clone.blendMode         = this.blendMode;
+    clone.isMask            = this.isMask;
+    clone.boundsPadding     = this.boundsPadding;
+    clone.dirty             = this.dirty;
+    clone.glDirty           = this.glDirty;
     clone.cachedSpriteDirty = this.cachedSpriteDirty;
 
     // copy graphics data
@@ -289,6 +320,32 @@ Graphics.prototype.lineBitmapStyle = function (bitmap, matrix, repeat)
         }
     }
 
+    return this;
+};
+
+/**
+ * Specifies the fill style used for subsequent calls to Graphics methods such as the drawRect() method or the drawCircle() method.
+ *
+ * @return {Graphics}
+ * @param bitmap {PIXI.Texture} the texture to fill the shape
+ * @param matrix {PIXI.Matrix} transformation matrix
+ * @param repeat {boolean} wether the bitmap should be tiled
+ */
+Graphics.prototype.beginBitmapFill = function (bitmap, matrix, repeat) {
+    this.filling = true;
+    this.fillBitmap = bitmap;
+    this.fillBitmapMatrix = matrix || math.Matrix.IDENTITY;
+    this.fillBitmapRepeat = (arguments.length < 3) ? true: repeat;
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length <= 2)
+        {
+            this.currentPath.fillBitmap = this.fillBitmap;
+            this.currentPath.fillBitmapMatrix = this.fillBitmapMatrix;
+            this.currentPath.fillBitmapRepeat = this.fillBitmapRepeat;
+        }
+    }
     return this;
 };
 
@@ -625,6 +682,9 @@ Graphics.prototype.endFill = function ()
     this.filling = false;
     this.fillColor = null;
     this.fillAlpha = 1;
+    this.fillBitmap = null;
+    this.fillBitmapMatrix = null;
+    this.fillBitmapRepeat = null;
 
     return this;
 };
@@ -1182,7 +1242,9 @@ Graphics.prototype.drawShape = function (shape)
 
     var data = new GraphicsData(this.lineWidth, this.lineColor, this.lineAlpha,
                                 this.lineBitmap, this.lineBitmapMatrix, this.lineBitmapRepeat,
-                                this.fillColor, this.fillAlpha, this.filling, shape);
+                                this.fillColor, this.fillAlpha,
+                                this.fillBitmap, this.fillBitmapMatrix, this.fillBitmapRepeat,
+                                this.filling,  shape);
 
     this.graphicsData.push(data);
 
