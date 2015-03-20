@@ -92,7 +92,7 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
                 context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
-                if(lineBitmapMatrix) {
+                if (lineBitmapMatrix) {
                     context.save();
                     context.transform(lineBitmapMatrix.a, lineBitmapMatrix.b, lineBitmapMatrix.c, lineBitmapMatrix.d, lineBitmapMatrix.tx, lineBitmapMatrix.ty);
                 }
@@ -104,12 +104,13 @@ CanvasGraphics.renderGraphics = function (graphics, context)
         }
         else if (data.type === CONST.SHAPES.RECT)
         {
+            context.beginPath();
+            context.rect(shape.x, shape.y, shape.width, shape.height);
 
             if (data.fill)
             {
                 context.globalAlpha = data.fillAlpha * worldAlpha;
                 context.fillStyle = this.getFill(context, fillColor, fillBitmap, fillBitmapMatrix, fillBitmapRepeat);
-                context.rect(shape.x, shape.y, shape.width, shape.height);
                 if (fillBitmapMatrix) {
                     context.save();
                     context.transform(fillBitmapMatrix.a, fillBitmapMatrix.b, fillBitmapMatrix.c, fillBitmapMatrix.d, fillBitmapMatrix.tx, fillBitmapMatrix.ty);
@@ -123,12 +124,11 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             {
                 context.globalAlpha = data.lineAlpha * worldAlpha;
                 context.strokeStyle = this.getFill(context, lineColor, lineBitmap, lineBitmapMatrix, lineBitmapRepeat);
-
-                if(lineBitmapMatrix) {
+                if (lineBitmapMatrix)  {
                     context.save();
                     context.transform(lineBitmapMatrix.a, lineBitmapMatrix.b, lineBitmapMatrix.c, lineBitmapMatrix.d, lineBitmapMatrix.tx, lineBitmapMatrix.ty);
                 }
-                context.strokeRect(shape.x, shape.y, shape.width, shape.height);
+                context.stroke();
                 if (lineBitmapMatrix) {
                     context.restore();
                 }
