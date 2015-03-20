@@ -109,11 +109,12 @@ CanvasGraphics.renderGraphics = function (graphics, context)
             {
                 context.globalAlpha = data.fillAlpha * worldAlpha;
                 context.fillStyle = this.getFill(context, fillColor, fillBitmap, fillBitmapMatrix, fillBitmapRepeat);
+                context.rect(shape.x, shape.y, shape.width, shape.height);
                 if (fillBitmapMatrix) {
                     context.save();
                     context.transform(fillBitmapMatrix.a, fillBitmapMatrix.b, fillBitmapMatrix.c, fillBitmapMatrix.d, fillBitmapMatrix.tx, fillBitmapMatrix.ty);
                 }
-                context.fillRect(shape.x, shape.y, shape.width, shape.height);
+                context.fill();
                 if (fillBitmapMatrix) {
                     context.restore();
                 }
