@@ -2,6 +2,7 @@ var WebGLManager = require('./WebGLManager'),
     TextureShader = require('../shaders/TextureShader'),
     ComplexPrimitiveShader = require('../shaders/ComplexPrimitiveShader'),
     PrimitiveShader = require('../shaders/PrimitiveShader'),
+    PatternShader = require('../shaders/PatternShader'),
     utils = require('../../../utils');
 
 /**
@@ -72,6 +73,7 @@ ShaderManager.prototype.onContextChange = function ()
     this.defaultShader = new TextureShader(this);
     this.primitiveShader = new PrimitiveShader(this);
     this.complexPrimitiveShader = new ComplexPrimitiveShader(this);
+    this.patternShader = new PatternShader(this);
 };
 
 /**

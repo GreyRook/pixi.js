@@ -81,9 +81,9 @@ GraphicsRenderer.prototype.render = function(graphics)
 
     for (var i = 0; i < webGL.data.length; i++)
     {
-        if (webGL.data[i].mode === 1)
+        webGLData = webGL.data[i];
+        if (webGLData.mode === 1)
         {
-            webGLData = webGL.data[i];
 
             renderer.stencilManager.pushStencil(graphics, webGLData, renderer);
 
@@ -92,10 +92,42 @@ GraphicsRenderer.prototype.render = function(graphics)
 
             renderer.stencilManager.popStencil(graphics, webGLData, renderer);
         }
-        else
+        else if (webGLData.mode === 2)
         {
-            webGLData = webGL.data[i];
+            shader = renderer.shaderManager.patternShader;
 
+            renderer.shaderManager.setShader( shader );//activatePrimitiveShader();
+
+            gl.uniformMatrix3fv(shader.uniforms.translationMatrix._location, false, graphics.worldTransform.toArray(true));
+
+            gl.uniformMatrix3fv(shader.uniforms.projectionMatrix._location, false, renderer.currentRenderTarget.projectionMatrix.toArray(true));
+
+            //gl.uniform3fv(shader.uniforms.tint._location, utils.hex2rgb(graphics.tint));
+
+            gl.uniform1f(shader.uniforms.alpha._location, graphics.worldAlpha);
+
+            shader.syncUniform({type: '2f', _location: shader.uniforms.tileSize._location, value: [webGLData.lineBitmap.width, webGLData.lineBitmap.height]});
+            //console.log(webGLData.lineBitmap.width, webGLData.lineBitmap.height);
+
+
+
+            //  shader.uniforms = {
+            //  tileTexture: { type: 'sampler2D', location: shader.uniforms.tileTexture._location, value: webGLData.lineBitmap}
+            //};
+            shader.textureCount = 1;
+            shader.syncUniform({ type: 'sampler2D', _location: shader.uniforms.tileTexture._location, value: webGLData.lineBitmap});
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, webGLData.buffer);
+
+            gl.vertexAttribPointer(shader.attributes.aVertexPosition, 2, gl.FLOAT, false, 4 * 6, 0);
+            //gl.vertexAttribPointer(shader.attributes.aColor, 4, gl.FLOAT, false,4 * 6, 2 * 4);
+
+            // set the index buffer!
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, webGLData.indexBuffer);
+            gl.drawElements(gl.TRIANGLE_STRIP,  webGLData.indices.length, gl.UNSIGNED_SHORT, 0 );
+        }
+        else if (webGLData.mode === 0)
+        {
 
             shader = renderer.shaderManager.primitiveShader;
 
@@ -118,7 +150,10 @@ GraphicsRenderer.prototype.render = function(graphics)
             // set the index buffer!
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, webGLData.indexBuffer);
             gl.drawElements(gl.TRIANGLE_STRIP,  webGLData.indices.length, gl.UNSIGNED_SHORT, 0 );
+
+
         }
+
     }
 };
 
@@ -217,7 +252,7 @@ GraphicsRenderer.prototype.updateGraphics = function(graphics)
             if (data.lineWidth > 0)
             {
                 webGLData = this.switchMode(webGL, 0);
-                this.buildLine(data, webGLData);
+                this.buildLine(webGL, data, webGLData);
             }
         }
         else
@@ -226,15 +261,15 @@ GraphicsRenderer.prototype.updateGraphics = function(graphics)
 
             if (data.type === CONST.SHAPES.RECT)
             {
-                this.buildRectangle(data, webGLData);
+                this.buildRectangle(webGL, data, webGLData);
             }
             else if (data.type === CONST.SHAPES.CIRC || data.type === CONST.SHAPES.ELIP)
             {
-                this.buildCircle(data, webGLData);
+                this.buildCircle(webGL, data, webGLData);
             }
             else if (data.type === CONST.SHAPES.RREC)
             {
-                this.buildRoundedRectangle(data, webGLData);
+                this.buildRoundedRectangle(webGL, data, webGLData);
             }
         }
 
@@ -294,7 +329,7 @@ GraphicsRenderer.prototype.switchMode = function (webGL, type)
  * @param graphicsData {Graphics} The graphics object containing all the necessary properties
  * @param webGLData {object} an object containing all the webGL-specific information to create this shape
  */
-GraphicsRenderer.prototype.buildRectangle = function (graphicsData, webGLData)
+GraphicsRenderer.prototype.buildRectangle = function (webGL, graphicsData, webGLData)
 {
     // --- //
     // need to convert points to a nice regular data
@@ -347,7 +382,7 @@ GraphicsRenderer.prototype.buildRectangle = function (graphicsData, webGLData)
                   x, y];
 
 
-        this.buildLine(graphicsData, webGLData);
+        this.buildLine(webGL, graphicsData, webGLData);
 
         graphicsData.points = tempPoints;
     }
@@ -360,7 +395,7 @@ GraphicsRenderer.prototype.buildRectangle = function (graphicsData, webGLData)
  * @param graphicsData {Graphics} The graphics object containing all the necessary properties
  * @param webGLData {object} an object containing all the webGL-specific information to create this shape
  */
-GraphicsRenderer.prototype.buildRoundedRectangle = function (graphicsData, webGLData)
+GraphicsRenderer.prototype.buildRoundedRectangle = function (webGL, graphicsData, webGLData)
 {
     var rrectData = graphicsData.shape;
     var x = rrectData.x;
@@ -418,7 +453,7 @@ GraphicsRenderer.prototype.buildRoundedRectangle = function (graphicsData, webGL
 
         graphicsData.points = recPoints;
 
-        this.buildLine(graphicsData, webGLData);
+        this.buildLine(webGL, graphicsData, webGLData);
 
         graphicsData.points = tempPoints;
     }
@@ -481,7 +516,7 @@ GraphicsRenderer.prototype.quadraticBezierCurve = function (fromX, fromY, cpX, c
  * @param graphicsData {Graphics} The graphics object to draw
  * @param webGLData {object} an object containing all the webGL-specific information to create this shape
  */
-GraphicsRenderer.prototype.buildCircle = function (graphicsData, webGLData)
+GraphicsRenderer.prototype.buildCircle = function (webGL, graphicsData, webGLData)
 {
     // need to convert points to a nice regular data
     var circleData = graphicsData.shape;
@@ -549,7 +584,7 @@ GraphicsRenderer.prototype.buildCircle = function (graphicsData, webGLData)
                                      y + Math.cos(seg * i) * height);
         }
 
-        this.buildLine(graphicsData, webGLData);
+        this.buildLine(webGL, graphicsData, webGLData);
 
         graphicsData.points = tempPoints;
     }
@@ -562,7 +597,7 @@ GraphicsRenderer.prototype.buildCircle = function (graphicsData, webGLData)
  * @param graphicsData {Graphics} The graphics object containing all the necessary properties
  * @param webGLData {object} an object containing all the webGL-specific information to create this shape
  */
-GraphicsRenderer.prototype.buildLine = function (graphicsData, webGLData)
+GraphicsRenderer.prototype.buildLine = function (webGL, graphicsData, webGLData)
 {
     // TODO OPTIMISE!
     var i = 0;
@@ -571,6 +606,15 @@ GraphicsRenderer.prototype.buildLine = function (graphicsData, webGLData)
     if (points.length === 0)
     {
         return;
+    }
+
+    if (graphicsData.lineBitmap)
+    {
+        webGLData = this.switchMode(webGL, 2);
+        webGLData.lineBitmap = graphicsData.lineBitmap;
+        webGLData.lineBitmapMatrix = graphicsData.lineBitmapMatrix;
+        webGLData.lineBitmapRepeat = graphicsData.lineBitmapRepeat;
+
     }
 
     // if the line width is an odd number add 0.5 to align to a whole pixel

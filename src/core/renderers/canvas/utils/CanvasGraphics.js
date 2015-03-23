@@ -105,7 +105,12 @@ CanvasGraphics.renderGraphics = function (graphics, context)
         else if (data.type === CONST.SHAPES.RECT)
         {
             context.beginPath();
-            context.rect(shape.x, shape.y, shape.width, shape.height);
+            //context.rect(shape.x, shape.y, shape.width, shape.height);
+            context.moveTo(shape.x, shape.y);
+            context.lineTo(shape.x + shape.width, shape.y);
+            context.lineTo(shape.x + shape.width, shape.y + shape.height);
+            context.lineTo(shape.x, shape.y + shape.height);
+            context.closePath();
 
             if (data.fill)
             {

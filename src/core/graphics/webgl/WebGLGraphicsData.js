@@ -57,6 +57,19 @@ function WebGLGraphicsData(gl) {
      */
     this.alpha = 1;
 
+    /*
+     * @member lineBitmap {PIXI.Texture} the texture of the line to draw
+     */
+    this.lineBitmap = null;
+    /*
+     * @member lineBitmapMatrix {PIXI.Matrix} the transformation matrix for lineBitmap
+     */
+    this.lineBitmapMatrix = null;
+    /*
+     * @member lineBitmapRepeat {boolean} wether or not the lineBitmap should be tiled
+     */
+    this.lineBitmapRepeat = null;
+
     /**
      * Whether this graphics is dirty or not
      * @member {boolean}
