@@ -67,7 +67,11 @@ TextureBrush.prototype.fillCanvas = function (context, worldAlpha)
 {
     if (this.transformMatrix !== Matrix.IDENTITY)
     {
-        context.restore();
+        context.save();
+        context.transform(
+            this.transformMatrix.a, this.transformMatrix.b, this.transformMatrix.c,
+            this.transformMatrix.d, this.transformMatrix.tx, this.transformMatrix.ty
+        );
     }
 
     context.globalAlpha = this.alpha * worldAlpha;

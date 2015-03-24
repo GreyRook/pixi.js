@@ -558,7 +558,7 @@ Graphics.prototype.beginFill = function (color, alpha)
  * @return {Graphics}
  * @param bitmap {PIXI.Texture} the texture to fill
  * @param matrix {PIXI.Matrix} transformation matrix
- * @param repeat {boolean} wether the bitmap should be tiled
+ * @param repeat {boolean} whether the bitmap should be tiled
  */
 Graphics.prototype.lineBitmapStyle = function (bitmap, matrix, repeat)
 {
@@ -580,6 +580,29 @@ Graphics.prototype.lineBitmapStyle = function (bitmap, matrix, repeat)
 
     return this;
 };
+
+/**
+ * Specifies the fill style used for subsequent calls to Graphics methods such as the drawRect() method or the drawCircle() method.
+ *
+ * @return {Graphics}
+ * @param bitmap {PIXI.Texture} the texture to fill the shape
+ * @param matrix {PIXI.Matrix} transformation matrix
+ * @param repeat {boolean} whether the bitmap should be tiled
+ */
+Graphics.prototype.beginBitmapFill = function (bitmap, matrix, repeat) {
+    this.filling = true;
+    this.fillStyle = new TextureBrush(bitmap, matrix, repeat);
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length <= 2)
+        {
+            this.currentPath.fillStyle = this.fillStyle;
+        }
+    }
+    return this;
+};
+
 
 /**
  * Applies a fill to the lines and shapes that were added since the last call to the beginFill() method.
