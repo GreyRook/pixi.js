@@ -7,7 +7,8 @@ var Container = require('../display/Container'),
     math = require('../math'),
     CONST = require('../const'),
     tempPoint = new math.Point(),
-    SolidBrush = require('./brushes/SolidBrush');
+    SolidBrush = require('./brushes/SolidBrush'),
+    TextureBrush = require('./brushes/TextureBrush');
 
 /**
  * The Graphics class contains methods used to draw primitive shapes such as lines, circles and
@@ -546,6 +547,37 @@ Graphics.prototype.beginFill = function (color, alpha)
             this.currentPath.fillStyle = this.fillStyle;
         }
     }
+    return this;
+};
+
+/**
+ * Specifies the line style used for subsequent calls to Graphics methods such as the lineTo() method or the drawCircle() method.
+ *
+ * Use lineStyle to specify stroke width
+ *
+ * @return {Graphics}
+ * @param bitmap {PIXI.Texture} the texture to fill
+ * @param matrix {PIXI.Matrix} transformation matrix
+ * @param repeat {boolean} wether the bitmap should be tiled
+ */
+Graphics.prototype.lineBitmapStyle = function (bitmap, matrix, repeat)
+{
+    this.strokeStyle = new TextureBrush(bitmap, matrix, repeat);
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length)
+        {
+            // halfway through a line? start a new one!
+            this.drawShape( new math.Polygon( this.currentPath.shape.points.slice(-2) ));
+        }
+        else
+        {
+            // otherwise its empty so lets just set the line properties
+            this.currentPath.strokeStyle = this.strokeStyle;
+        }
+    }
+
     return this;
 };
 
