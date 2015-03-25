@@ -1,4 +1,3 @@
-
 /**
  * A GraphicsData object.
  *

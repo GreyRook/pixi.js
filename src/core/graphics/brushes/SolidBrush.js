@@ -14,11 +14,6 @@ function SolidBrush(color, alpha)
     Brush.call(this, color, alpha);
 
     /**
-     * @member {number} Tinted color of this brush is cached here, used by CanvasGraphics
-     */
-    this.tint = color;
-
-    /**
      * @member {String} the value that can be assigned to a context.fillStyle of StrokeStyle
      * @private
      */
@@ -28,19 +23,14 @@ function SolidBrush(color, alpha)
 SolidBrush.prototype = Object.create(Brush.prototype);
 SolidBrush.prototype.constructor = SolidBrush;
 
-/**
- * Returns the value that can be assigned to a context.fillStyle of StrokeStyle
- *
- * @return {string}
- */
-SolidBrush.prototype.getCanvasBrush = function ()
-{
-    if (!this._canvasBrush)
-    {
-        this._canvasBrush = '#' + ('00000' + (this.tint | 0).toString(16)).substr(-6);
+Object.defineProperties(SolidBrush.prototype, {
+    tint: {
+        set: function (value)
+        {
+            this._canvasBrush = '#' + ('00000' + (value | 0).toString(16)).substr(-6);
+        }
     }
-    return this._canvasBrush;
-};
+});
 
 /**
  * Sets the brush as a fill style for the given canvas context
@@ -50,7 +40,7 @@ SolidBrush.prototype.getCanvasBrush = function ()
  */
 SolidBrush.prototype.fillCanvas = function (context, worldAlpha) {
     context.globalAlpha = this.alpha * worldAlpha;
-    context.fillStyle = this.getCanvasBrush();
+    context.fillStyle = this._canvasBrush;
     context.fill();
 };
 
@@ -63,10 +53,8 @@ SolidBrush.prototype.fillCanvas = function (context, worldAlpha) {
  */
 SolidBrush.prototype.strokeCanvas = function (context, worldAlpha) {
     context.globalAlpha = this.alpha * worldAlpha;
-    context.strokeStyle = this.getCanvasBrush();
+    context.strokeStyle = this._canvasBrush;
     context.stroke();
 };
-
-
 
 module.exports = SolidBrush;
