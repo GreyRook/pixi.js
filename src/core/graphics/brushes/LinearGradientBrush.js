@@ -1,0 +1,117 @@
+var Brush = require('./Brush');
+
+/**
+ * A brush for creating linear gradient fills and borders
+ *
+ * @class
+ * @extends Brush
+ * @param colors {number[]} An array of color values. For example, [0xFF0000,0x0000FF] would define a gradient drawing from red to blue
+ * @param alphas {Number[]} An array of alpha values which correspond to the colors
+ * @param ratios {Number[]} An array of gradient positions which correspond to the colors
+ * For example, [0.1, 0.9] would draw the first color to 10% then interpolating to the second color at 90%
+ * @param x0 {Number}  The x axis of the coordinate of the start point
+ * @param y0 {Number}  The y axis of the coordinate of the start point
+ * @param x1 {Number}  The x axis of the coordinate of the end point
+ * @param y1 {Number}  The y axis of the coordinate of the end point
+ * @memberof PIXI
+ */
+function LinearGradientBrush(colors, alphas, ratios, x0, y0, x1, y1)
+{
+    Brush.call(this, 0, 1);
+
+    /**
+     * @member {number[]} An array of color values.
+     */
+    this.colors = colors;
+
+    /**
+     * @member {number[]}  An array of alpha values
+     */
+    this.alphas = alphas;
+
+    /**
+     * @member {number[]} An array of gradient positions which correspond to the colors
+     */
+    this.ratios = ratios;
+
+    /**
+     * @member {number} The x axis of the coordinate of the start point
+     */
+    this.x0 = x0;
+
+    /**
+     * @member {number} The y axis of the coordinate of the start point
+     */
+    this.y0 = y0;
+
+    /**
+     * @member {number} The x axis of the coordinate of the end point
+     */
+    this.x1 = x1;
+
+    /**
+     * @member {number} The y axis of the coordinate of the end point
+     */
+    this.y1 = y1;
+
+    /**
+     * @member {CanvasGradient} the value that can be assigned to a context.fillStyle of StrokeStyle
+     * @private
+     */
+    this._canvasBrush = null;
+}
+
+LinearGradientBrush.prototype = Object.create(Brush.prototype);
+LinearGradientBrush.prototype.constructor = LinearGradientBrush;
+
+/**
+ * Returns the value that can be assigned to a context.fillStyle of StrokeStyle
+ *
+ * @return {CanvasGradient}
+ */
+LinearGradientBrush.prototype.getCanvasBrush = function (context)
+{
+    var color, r, g, b;
+    if (!this._canvasBrush)
+    {
+        this._canvasBrush = context.createLinearGradient(this.x0, this.y0, this.x1, this.y1);
+        for (var i = 0; i < this.colors.length; i++)
+        {
+            color = this.colors[i];
+            r = (color & 0xFF0000) >> 16;
+            g = (color & 0x00FF00) >> 8;
+            b = color & 0x0000FF;
+            this._canvasBrush.addColorStop(this.ratios[i], 'rgba(' + r + ', ' + g + ', ' + b + ', ' + this.alphas[i].toFixed(3) + ')');
+        }
+    }
+    return this._canvasBrush;
+};
+
+/**
+ * Sets the brush as a fill style for the given canvas context
+ *
+ * @param context {CanvasRenderingContext2D}
+ * @param worldAlpha {number}
+ */
+LinearGradientBrush.prototype.fillCanvas = function (context, worldAlpha) {
+    context.globalAlpha = this.alpha * worldAlpha;
+    context.fillStyle = this.getCanvasBrush(context);
+    context.fill();
+};
+
+
+/**
+ * Sets the brush as a stroke style for the given canvas context
+ *
+ * @param context {CanvasRenderingContext2D}
+ * @param worldAlpha {number}
+ */
+LinearGradientBrush.prototype.strokeCanvas = function (context, worldAlpha) {
+    context.globalAlpha = this.alpha * worldAlpha;
+    context.strokeStyle = this.getCanvasBrush(context);
+    context.stroke();
+};
+
+
+
+module.exports = LinearGradientBrush;

@@ -7,7 +7,8 @@ var Container = require('../display/Container'),
     math = require('../math'),
     CONST = require('../const'),
     tempPoint = new math.Point(),
-    SolidBrush = require('./brushes/SolidBrush');
+    SolidBrush = require('./brushes/SolidBrush'),
+    LinearGradientBrush = require('./brushes/LinearGradientBrush');
 
 /**
  * The Graphics class contains methods used to draw primitive shapes such as lines, circles and
@@ -41,7 +42,7 @@ function Graphics()
      *
      * @member {Brush}
      */
-    this.strokeStyle = new SolidBrush(0, 1);;
+    this.strokeStyle = new SolidBrush(0, 1);
 
     /**
      * Graphics data
@@ -521,6 +522,40 @@ Graphics.prototype.arc = function(cx, cy, radius, startAngle, endAngle, anticloc
     }
 
     this.dirty = true;
+
+    return this;
+};
+
+/**
+ * Specifies a linear gradient style that will be used for drawing lines
+ *
+ * @param colors {number[]} An array of color values. For example, [0xFF0000,0x0000FF] would define a gradient drawing from red to blue
+ * @param alphas {Number[]} An array of alpha values which correspond to the colors
+ * @param ratios {Number[]} An array of gradient positions which correspond to the colors
+ * For example, [0.1, 0.9] would draw the first color to 10% then interpolating to the second color at 90%
+ * @param x0 {Number}  The x axis of the coordinate of the start point
+ * @param y0 {Number}  The y axis of the coordinate of the start point
+ * @param x1 {Number}  The x axis of the coordinate of the end point
+ * @param y1 {Number}  The y axis of the coordinate of the end point * @return {Graphics}
+ */
+
+Graphics.prototype.lineLinearGradientStyle = function (colors, alphas, ratios, x0, y0, x1, y1)
+{
+    this.strokeStyle = new LinearGradientBrush(colors, alphas, ratios, x0, y0, x1, y1);
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length)
+        {
+            // halfway through a line? start a new one!
+            this.drawShape( new math.Polygon( this.currentPath.shape.points.slice(-2) ));
+        }
+        else
+        {
+            // otherwise its empty so lets just set the line properties
+            this.currentPath.strokeStyle = this.strokeStyle;
+        }
+    }
 
     return this;
 };
