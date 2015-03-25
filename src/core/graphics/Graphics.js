@@ -8,7 +8,8 @@ var Container = require('../display/Container'),
     CONST = require('../const'),
     tempPoint = new math.Point(),
     SolidBrush = require('./brushes/SolidBrush'),
-    LinearGradientBrush = require('./brushes/LinearGradientBrush');
+    LinearGradientBrush = require('./brushes/LinearGradientBrush'),
+    RadialGradientBrush = require('./brushes/RadialGradientBrush');
 
 /**
  * The Graphics class contains methods used to draw primitive shapes such as lines, circles and
@@ -529,12 +530,50 @@ Graphics.prototype.arc = function(cx, cy, radius, startAngle, endAngle, anticloc
  * @param x0 {Number}  The x axis of the coordinate of the start point
  * @param y0 {Number}  The y axis of the coordinate of the start point
  * @param x1 {Number}  The x axis of the coordinate of the end point
- * @param y1 {Number}  The y axis of the coordinate of the end point * @return {Graphics}
+ * @param y1 {Number}  The y axis of the coordinate of the end point
+ * @return {Graphics}
  */
 
 Graphics.prototype.lineLinearGradientStyle = function (colors, alphas, ratios, x0, y0, x1, y1)
 {
     this.strokeStyle = new LinearGradientBrush(colors, alphas, ratios, x0, y0, x1, y1);
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length)
+        {
+            // halfway through a line? start a new one!
+            this.drawShape( new math.Polygon( this.currentPath.shape.points.slice(-2) ));
+        }
+        else
+        {
+            // otherwise its empty so lets just set the line properties
+            this.currentPath.strokeStyle = this.strokeStyle;
+        }
+    }
+
+    return this;
+};
+
+/**
+ * Specifies a radial gradient style that will be used for drawing lines
+ *
+ * @param colors {number[]} An array of color values. For example, [0xFF0000,0x0000FF] would define a gradient drawing from red to blue
+ * @param alphas {Number[]} An array of alpha values which correspond to the colors
+ * @param ratios {Number[]} An array of gradient positions which correspond to the colors
+ * For example, [0.1, 0.9] would draw the first color to 10% then interpolating to the second color at 90%
+ * @param x0 {Number}  The x axis of the coordinate of the start point
+ * @param y0 {Number}  The y axis of the coordinate of the start point
+ * @param r0 {Number}  The radius of the start circle.
+ * @param x1 {Number}  The x axis of the coordinate of the end point
+ * @param y1 {Number}  The y axis of the coordinate of the end point
+ * @param r1 {Number}  The radius of the end circle
+ * @return {Graphics}
+ */
+
+Graphics.prototype.lineRadialGradientStyle = function (colors, alphas, ratios, x0, y0, r0, x1, y1, r1)
+{
+    this.strokeStyle = new RadialGradientBrush(colors, alphas, ratios, x0, y0, r0, x1, y1, r1);
 
     if (this.currentPath)
     {
@@ -564,7 +603,8 @@ Graphics.prototype.lineLinearGradientStyle = function (colors, alphas, ratios, x
  * @param x0 {Number}  The x axis of the coordinate of the start point
  * @param y0 {Number}  The y axis of the coordinate of the start point
  * @param x1 {Number}  The x axis of the coordinate of the end point
- * @param y1 {Number}  The y axis of the coordinate of the end point * @return {Graphics}
+ * @param y1 {Number}  The y axis of the coordinate of the end point
+ * @return {Graphics}
  */
 
 Graphics.prototype.beginLinearGradientFill = function (colors, alphas, ratios, x0, y0, x1, y1)
