@@ -593,6 +593,39 @@ Graphics.prototype.lineRadialGradientStyle = function (colors, alphas, ratios, x
 };
 
 /**
+ * Specifies a radial gradient fill that subsequent calls to other Graphics methods
+ *
+ * @param colors {number[]} An array of color values. For example, [0xFF0000,0x0000FF] would define a gradient drawing from red to blue
+ * @param alphas {Number[]} An array of alpha values which correspond to the colors
+ * @param ratios {Number[]} An array of gradient positions which correspond to the colors
+ * For example, [0.1, 0.9] would draw the first color to 10% then interpolating to the second color at 90%
+ * @param x0 {Number}  The x axis of the coordinate of the start point
+ * @param y0 {Number}  The y axis of the coordinate of the start point
+ * @param r0 {Number}  The radius of the start circle.
+ * @param x1 {Number}  The x axis of the coordinate of the end point
+ * @param y1 {Number}  The y axis of the coordinate of the end point
+ * @param r1 {Number}  The radius of the end circle
+ * @return {Graphics}
+ */
+
+Graphics.prototype.beginRadialGradientFill = function (colors, alphas, ratios, x0, y0, r0, x1, y1, r1)
+{
+    this.filling = true;
+    this.fillStyle = new RadialGradientBrush(colors, alphas, ratios, x0, y0, r0, x1, y1, r1);
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length <= 2)
+        {
+            this.currentPath.fill = this.filling;
+            this.currentPath.fillStyle = this.fillStyle;
+        }
+    }
+    return this;
+};
+
+
+/**
  * Specifies a linear gradient fill that subsequent calls to other Graphics methods
  * (such as drawRect() or drawCircle()) use when drawing.
  *
