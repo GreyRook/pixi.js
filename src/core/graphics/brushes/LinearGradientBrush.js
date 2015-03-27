@@ -17,7 +17,7 @@ var Brush = require('./Brush');
  */
 function LinearGradientBrush(colors, alphas, ratios, x0, y0, x1, y1)
 {
-    Brush.call(this, 0, 1);
+    Brush.call(this, 0xFFFFFF, 1);
 
     /**
      * @member {number[]} An array of color values.
@@ -59,6 +59,17 @@ function LinearGradientBrush(colors, alphas, ratios, x0, y0, x1, y1)
      * @private
      */
     this._canvasBrush = null;
+
+    /**
+     * @member {number} the tint of the graphics. Will be assigned by CanvasGraphics
+     */
+    this.tint = 0xFFFFFF;
+
+    /**
+     * @member {number} the previous tint. Whent it !== tint, we need to regenerate _canvasBrush
+     * @private
+     */
+    this._prevTint = 0xFFFFFF;
 }
 
 LinearGradientBrush.prototype = Object.create(Brush.prototype);
@@ -71,13 +82,37 @@ LinearGradientBrush.prototype.constructor = LinearGradientBrush;
  */
 LinearGradientBrush.prototype.getCanvasBrush = function (context)
 {
-    var color, r, g, b;
-    if (!this._canvasBrush)
+    var color, r, g, b, colors, i;
+    if (this.tint !== this._prevTint || this._canvasBrush === null)
     {
-        this._canvasBrush = context.createLinearGradient(this.x0, this.y0, this.x1, this.y1);
-        for (var i = 0; i < this.colors.length; i++)
+        this._prevTint = this.tint;
+        if (this.tint === 0xFFFFFF)
         {
-            color = this.colors[i];
+            colors = this.colors;
+        }
+        else
+        {
+            var tintR = (this.tint >> 16 & 0xFF) / 255,
+                tintG = (this.tint >> 8 & 0xFF) / 255,
+                tintB = (this.tint & 0xFF)/ 255;
+
+            colors = [];
+            for (i = 0; i < this.colors.length; i++)
+            {
+                color = this.colors[i];
+                colors.push(
+                    ((color >> 16 & 0xFF) / 255 * tintR*255 << 16)
+                    + ((color >> 8 & 0xFF) / 255 * tintG*255 << 8)
+                    +  (color & 0xFF) / 255 * tintB*255
+                );
+
+            }
+        }
+
+        this._canvasBrush = context.createLinearGradient(this.x0, this.y0, this.x1, this.y1);
+        for (i = 0; i < colors.length; i++)
+        {
+            color = colors[i];
             r = (color & 0xFF0000) >> 16;
             g = (color & 0x00FF00) >> 8;
             b = color & 0x0000FF;
