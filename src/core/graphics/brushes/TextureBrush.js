@@ -1,7 +1,7 @@
-
-
 var Brush = require('./Brush'),
-    Matrix = require('../../math/Matrix');
+    Matrix = require('../../math/Matrix'),
+    CanvasTinter = require('../../renderers/canvas/utils/CanvasTinter');
+
 
 /**
  * A Brush that uses a texture for filling or outlining a shape.
@@ -15,7 +15,7 @@ var Brush = require('./Brush'),
  */
 function TextureBrush(texture, transformMatrix, repeat)
 {
-    Brush.call(this, 0, 1);
+    Brush.call(this, 0xFFFFFF, 1);
 
     /**
      * @member texture {Texture} The texture of the brush
@@ -38,6 +38,17 @@ function TextureBrush(texture, transformMatrix, repeat)
      */
     this._canvasBrush = null;
 
+    /**
+     * @member {number} the tint of the graphics. Will be assigned by CanvasGraphics
+     */
+    this.tint = 0xFFFFFF;
+
+    /**
+     * @member {number} the previous tint. Whent it !== tint, we need to regenerate _canvasBrush
+     * @private
+     */
+    this._prevTint = 0xFFFFFF;
+
 }
 
 TextureBrush.prototype = Object.create(Brush.prototype);
@@ -50,9 +61,18 @@ TextureBrush.prototype.constructor = TextureBrush;
  */
 TextureBrush.prototype.getCanvasBrush = function (context)
 {
-    if (!this._canvasBrush)
+    if (this.tint !== this._prevTint || this._canvasBrush === null)
     {
-        this._canvasBrush = context.createPattern(this.texture.baseTexture.source, this.repeat ? 'repeat' : 'no-repeat');
+        if (this.texture.baseTexture.hasLoaded)
+        {
+            this._prevTint = this.tint;
+
+            var texture = (this.tint === 0xFFFFFF)
+                ? this.texture.baseTexture.source
+                : CanvasTinter.getTintedTexture({texture: this.texture}, this.tint);
+
+            this._canvasBrush = context.createPattern(texture, this.repeat ? 'repeat' : 'no-repeat');
+        }
     }
     return this._canvasBrush;
 };
@@ -74,7 +94,7 @@ TextureBrush.prototype.fillCanvas = function (context, worldAlpha)
         );
     }
 
-    context.globalAlpha = this.alpha * worldAlpha;
+    context.globalAlpha = worldAlpha;
     context.fillStyle = this.getCanvasBrush(context);
     context.fill();
 
@@ -102,7 +122,7 @@ TextureBrush.prototype.strokeCanvas = function (context, worldAlpha)
         );
     }
 
-    context.globalAlpha = this.alpha * worldAlpha;
+    context.globalAlpha = worldAlpha;
     context.strokeStyle = this.getCanvasBrush(context);
     context.stroke();
 
@@ -111,7 +131,5 @@ TextureBrush.prototype.strokeCanvas = function (context, worldAlpha)
         context.restore();
     }
 };
-
-
 
 module.exports = TextureBrush;
