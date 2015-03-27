@@ -4,7 +4,7 @@
 
 /**
  * The Graphics class contains methods used to draw primitive shapes such as lines, circles and rectangles to the display, and color and fill them.
- * 
+ *
  * @class Graphics
  * @extends DisplayObjectContainer
  * @constructor
@@ -16,12 +16,11 @@ PIXI.Graphics = function()
     this.renderable = true;
 
     /**
-     * The alpha value used when filling the Graphics object.
+     * The fill style of the Graphics object.
      *
-     * @property fillAlpha
-     * @type Number
+     * @member {Brush}
      */
-    this.fillAlpha = 1;
+    this.fillStyle = new PIXI.SolidBrush(0, 1);
 
     /**
      * The width (thickness) of any lines drawn.
@@ -32,13 +31,11 @@ PIXI.Graphics = function()
     this.lineWidth = 0;
 
     /**
-     * The color of any lines drawn.
+     * The stroke style of the Graphics object.
      *
-     * @property lineColor
-     * @type String
-     * @default 0
+     * @member {Brush}
      */
-    this.lineColor = 0;
+    this.strokeStyle = new PIXI.SolidBrush(0, 1);
 
     /**
      * Graphics data
@@ -66,7 +63,7 @@ PIXI.Graphics = function()
      * @default PIXI.blendModes.NORMAL;
      */
     this.blendMode = PIXI.blendModes.NORMAL;
-    
+
     /**
      * Current path
      *
@@ -75,7 +72,7 @@ PIXI.Graphics = function()
      * @private
      */
     this.currentPath = null;
-    
+
     /**
      * Array containing some WebGL-related properties used by the WebGL renderer.
      *
@@ -105,7 +102,7 @@ PIXI.Graphics = function()
 
     /**
      * Used to detect if the graphics object has changed. If this is set to true then the graphics object will be recalculated.
-     * 
+     *
      * @property dirty
      * @type Boolean
      * @private
@@ -114,7 +111,7 @@ PIXI.Graphics = function()
 
     /**
      * Used to detect if the webgl graphics object has changed. If this is set to true then the graphics object will be recalculated.
-     * 
+     *
      * @property webGLDirty
      * @type Boolean
      * @private
@@ -123,7 +120,7 @@ PIXI.Graphics = function()
 
     /**
      * Used to detect if the cached sprite object needs to be updated.
-     * 
+     *
      * @property cachedSpriteDirty
      * @type Boolean
      * @private
@@ -180,8 +177,7 @@ Object.defineProperty(PIXI.Graphics.prototype, "cacheAsBitmap", {
 PIXI.Graphics.prototype.lineStyle = function(lineWidth, color, alpha)
 {
     this.lineWidth = lineWidth || 0;
-    this.lineColor = color || 0;
-    this.lineAlpha = (arguments.length < 3) ? 1 : alpha;
+    this.strokeStyle = new PIXI.SolidBrush(color || 0, alpha);
 
     if(this.currentPath)
     {
@@ -194,13 +190,202 @@ PIXI.Graphics.prototype.lineStyle = function(lineWidth, color, alpha)
 
         // otherwise its empty so lets just set the line properties
         this.currentPath.lineWidth = this.lineWidth;
-        this.currentPath.lineColor = this.lineColor;
-        this.currentPath.lineAlpha = this.lineAlpha;
-        
+        this.currentPath.strokeStyle = this.strokeStyle;
     }
 
     return this;
 };
+
+/**
+ * Specifies the line style used for subsequent calls to Graphics methods such as the lineTo() method or the drawCircle() method.
+ *
+ * Use lineStyle to specify stroke width
+ *
+ * @return {Graphics}
+ * @param bitmap {PIXI.Texture} the texture to fill
+ * @param matrix {PIXI.Matrix} transformation matrix
+ * @param repeat {boolean} whether the bitmap should be tiled
+ */
+PIXI.Graphics.prototype.lineBitmapStyle = function (bitmap, matrix, repeat)
+{
+    this.strokeStyle = new PIXI.TextureBrush(bitmap, matrix, repeat);
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length)
+        {
+            // halfway through a line? start a new one!
+            this.drawShape( new PIXI.Polygon( this.currentPath.shape.points.slice(-2) ));
+        }
+        else
+        {
+            // otherwise its empty so lets just set the line properties
+            this.currentPath.strokeStyle = this.strokeStyle;
+        }
+    }
+
+    return this;
+};
+
+/**
+ * Specifies the fill style used for subsequent calls to Graphics methods such as the drawRect() method or the drawCircle() method.
+ *
+ * @return {Graphics}
+ * @param bitmap {PIXI.Texture} the texture to fill the shape
+ * @param matrix {PIXI.Matrix} transformation matrix
+ * @param repeat {boolean} whether the bitmap should be tiled
+ */
+PIXI.Graphics.prototype.beginBitmapFill = function (bitmap, matrix, repeat) {
+    this.filling = true;
+    this.fillStyle = new PIXI.TextureBrush(bitmap, matrix, repeat);
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length <= 2)
+        {
+            this.currentPath.fillStyle = this.fillStyle;
+        }
+    }
+    return this;
+};
+
+/**
+ * Specifies a linear gradient style that will be used for drawing lines
+ *
+ * @param colors {number[]} An array of color values. For example, [0xFF0000,0x0000FF] would define a gradient drawing from red to blue
+ * @param alphas {Number[]} An array of alpha values which correspond to the colors
+ * @param ratios {Number[]} An array of gradient positions which correspond to the colors
+ * For example, [0.1, 0.9] would draw the first color to 10% then interpolating to the second color at 90%
+ * @param x0 {Number}  The x axis of the coordinate of the start point
+ * @param y0 {Number}  The y axis of the coordinate of the start point
+ * @param x1 {Number}  The x axis of the coordinate of the end point
+ * @param y1 {Number}  The y axis of the coordinate of the end point
+ * @return {Graphics}
+ */
+
+PIXI.Graphics.prototype.lineLinearGradientStyle = function (colors, alphas, ratios, x0, y0, x1, y1)
+{
+    this.strokeStyle = new PIXI.LinearGradientBrush(colors, alphas, ratios, x0, y0, x1, y1);
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length)
+        {
+            // halfway through a line? start a new one!
+            this.drawShape( new PIXI.Polygon( this.currentPath.shape.points.slice(-2) ));
+        }
+        else
+        {
+            // otherwise its empty so lets just set the line properties
+            this.currentPath.strokeStyle = this.strokeStyle;
+        }
+    }
+
+    return this;
+};
+
+/**
+ * Specifies a radial gradient style that will be used for drawing lines
+ *
+ * @param colors {number[]} An array of color values. For example, [0xFF0000,0x0000FF] would define a gradient drawing from red to blue
+ * @param alphas {Number[]} An array of alpha values which correspond to the colors
+ * @param ratios {Number[]} An array of gradient positions which correspond to the colors
+ * For example, [0.1, 0.9] would draw the first color to 10% then interpolating to the second color at 90%
+ * @param x0 {Number}  The x axis of the coordinate of the start point
+ * @param y0 {Number}  The y axis of the coordinate of the start point
+ * @param r0 {Number}  The radius of the start circle.
+ * @param x1 {Number}  The x axis of the coordinate of the end point
+ * @param y1 {Number}  The y axis of the coordinate of the end point
+ * @param r1 {Number}  The radius of the end circle
+ * @return {Graphics}
+ */
+
+PIXI.Graphics.prototype.lineRadialGradientStyle = function (colors, alphas, ratios, circle0, circle1)
+{
+    this.strokeStyle = new PIXI.RadialGradientBrush(colors, alphas, ratios, circle0, circle1);
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length)
+        {
+            // halfway through a line? start a new one!
+            this.drawShape( new PIXI.Polygon( this.currentPath.shape.points.slice(-2) ));
+        }
+        else
+        {
+            // otherwise its empty so lets just set the line properties
+            this.currentPath.strokeStyle = this.strokeStyle;
+        }
+    }
+
+    return this;
+};
+
+/**
+ * Specifies a radial gradient fill that subsequent calls to other Graphics methods
+ *
+ * @param colors {number[]} An array of color values. For example, [0xFF0000,0x0000FF] would define a gradient drawing from red to blue
+ * @param alphas {Number[]} An array of alpha values which correspond to the colors
+ * @param ratios {Number[]} An array of gradient positions which correspond to the colors
+ * For example, [0.1, 0.9] would draw the first color to 10% then interpolating to the second color at 90%
+ * @param x0 {Number}  The x axis of the coordinate of the start point
+ * @param y0 {Number}  The y axis of the coordinate of the start point
+ * @param r0 {Number}  The radius of the start circle.
+ * @param x1 {Number}  The x axis of the coordinate of the end point
+ * @param y1 {Number}  The y axis of the coordinate of the end point
+ * @param r1 {Number}  The radius of the end circle
+ * @return {Graphics}
+ */
+
+PIXI.Graphics.prototype.beginRadialGradientFill = function (colors, alphas, ratios, circle0, circle1)
+{
+    this.filling = true;
+    this.fillStyle = new PIXI.RadialGradientBrush(colors, alphas, ratios, circle0, circle1);
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length <= 2)
+        {
+            this.currentPath.fill = this.filling;
+            this.currentPath.fillStyle = this.fillStyle;
+        }
+    }
+    return this;
+};
+
+
+/**
+ * Specifies a linear gradient fill that subsequent calls to other Graphics methods
+ * (such as drawRect() or drawCircle()) use when drawing.
+ *
+ * @param colors {number[]} An array of color values. For example, [0xFF0000,0x0000FF] would define a gradient drawing from red to blue
+ * @param alphas {Number[]} An array of alpha values which correspond to the colors
+ * @param ratios {Number[]} An array of gradient positions which correspond to the colors
+ * For example, [0.1, 0.9] would draw the first color to 10% then interpolating to the second color at 90%
+ * @param x0 {Number}  The x axis of the coordinate of the start point
+ * @param y0 {Number}  The y axis of the coordinate of the start point
+ * @param x1 {Number}  The x axis of the coordinate of the end point
+ * @param y1 {Number}  The y axis of the coordinate of the end point
+ * @return {Graphics}
+ */
+
+PIXI.Graphics.prototype.beginLinearGradientFill = function (colors, alphas, ratios, x0, y0, x1, y1)
+{
+    this.filling = true;
+    this.fillStyle = new PIXI.LinearGradientBrush(colors, alphas, ratios, x0, y0, x1, y1);
+
+    if (this.currentPath)
+    {
+        if (this.currentPath.shape.points.length <= 2)
+        {
+            this.currentPath.fill = this.filling;
+            this.currentPath.fillStyle = this.fillStyle;
+        }
+    }
+    return this;
+};
+
+
 
 /**
  * Moves the current drawing position to x, y.
@@ -261,7 +446,7 @@ PIXI.Graphics.prototype.quadraticCurveTo = function(cpX, cpY, toX, toY)
     n = 20,
     points = this.currentPath.shape.points;
     if(points.length === 0)this.moveTo(0, 0);
-    
+
 
     var fromX = points[points.length-2];
     var fromY = points[points.length-1];
@@ -317,7 +502,7 @@ PIXI.Graphics.prototype.bezierCurveTo = function(cpX, cpY, cpX2, cpY2, toX, toY)
 
     var fromX = points[points.length-2];
     var fromY = points[points.length-1];
-    
+
     var j = 0;
 
     for (var i=1; i<=n; i++)
@@ -330,11 +515,11 @@ PIXI.Graphics.prototype.bezierCurveTo = function(cpX, cpY, cpX2, cpY2, toX, toY)
 
         t2 = j * j;
         t3 = t2 * j;
-        
+
         points.push( dt3 * fromX + 3 * dt2 * j * cpX + 3 * dt * t2 * cpX2 + t3 * toX,
                      dt3 * fromY + 3 * dt2 * j * cpY + 3 * dt * t2 * cpY2 + t3 * toY);
     }
-    
+
     this.dirty = true;
 
     return this;
@@ -342,7 +527,7 @@ PIXI.Graphics.prototype.bezierCurveTo = function(cpX, cpY, cpX2, cpY2, toX, toY)
 
 /*
  * The arcTo() method creates an arc/curve between two tangents on the canvas.
- * 
+ *
  * "borrowed" from https://code.google.com/p/fxcanvas/ - thanks google!
  *
  * @method arcTo
@@ -447,7 +632,7 @@ PIXI.Graphics.prototype.arc = function(cx, cy, radius, startAngle, endAngle, ant
         this.moveTo(startX, startY);
         points = this.currentPath.shape.points;
     }
-    
+
     if (startAngle === endAngle)return this;
 
     if( !anticlockwise && endAngle <= startAngle )
@@ -469,7 +654,7 @@ PIXI.Graphics.prototype.arc = function(cx, cy, radius, startAngle, endAngle, ant
 
     var cTheta = Math.cos(theta);
     var sTheta = Math.sin(theta);
-    
+
     var segMinus = segs - 1;
 
     var remainder = ( segMinus % 1 ) / segMinus;
@@ -478,7 +663,7 @@ PIXI.Graphics.prototype.arc = function(cx, cy, radius, startAngle, endAngle, ant
     {
         var real =  i + remainder * i;
 
-    
+
         var angle = ((theta) + startAngle + (theta2 * real));
 
         var c = Math.cos(angle);
@@ -505,16 +690,14 @@ PIXI.Graphics.prototype.arc = function(cx, cy, radius, startAngle, endAngle, ant
 PIXI.Graphics.prototype.beginFill = function(color, alpha)
 {
     this.filling = true;
-    this.fillColor = color || 0;
-    this.fillAlpha = (alpha === undefined) ? 1 : alpha;
+    this.fillStyle = new PIXI.SolidBrush(color, alpha);
 
     if(this.currentPath)
     {
         if(this.currentPath.shape.points.length <= 2)
         {
             this.currentPath.fill = this.filling;
-            this.currentPath.fillColor = this.fillColor;
-            this.currentPath.fillAlpha = this.fillAlpha;
+            this.currentPath.fillStyle = this.fillStyle;
         }
     }
     return this;
@@ -529,15 +712,14 @@ PIXI.Graphics.prototype.beginFill = function(color, alpha)
 PIXI.Graphics.prototype.endFill = function()
 {
     this.filling = false;
-    this.fillColor = null;
-    this.fillAlpha = 1;
+    this.fillStyle = null;
 
     return this;
 };
 
 /**
  * Draws a rectangle.
- * 
+ *
  * @method drawRect
  *
  * @param x {Number} The X coord of the top-left of the rectangle
@@ -555,7 +737,7 @@ PIXI.Graphics.prototype.drawRect = function( x, y, width, height )
 
 /**
  * Draws a rounded rectangle.
- * 
+ *
  * @method drawRoundedRect
  *
  * @param x {Number} The X coord of the top-left of the rectangle
@@ -651,16 +833,16 @@ PIXI.Graphics.prototype.generateTexture = function(resolution, scaleMode)
     resolution = resolution || 1;
 
     var bounds = this.getBounds();
-   
+
     var canvasBuffer = new PIXI.CanvasBuffer(bounds.width * resolution, bounds.height * resolution);
-    
+
     var texture = PIXI.Texture.fromCanvas(canvasBuffer.canvas, scaleMode);
     texture.baseTexture.resolution = resolution;
 
     canvasBuffer.context.scale(resolution, resolution);
 
     canvasBuffer.context.translate(-bounds.x,-bounds.y);
-    
+
     PIXI.CanvasGraphics.renderGraphics(this, canvasBuffer.context);
 
     return texture;
@@ -670,7 +852,7 @@ PIXI.Graphics.prototype.generateTexture = function(resolution, scaleMode)
 * Renders the object using the WebGL renderer
 *
 * @method _renderWebGL
-* @param renderSession {RenderSession} 
+* @param renderSession {RenderSession}
 * @private
 */
 PIXI.Graphics.prototype._renderWebGL = function(renderSession)
@@ -685,7 +867,7 @@ PIXI.Graphics.prototype._renderWebGL = function(renderSession)
         {
 
             this._generateCachedSprite();
-   
+
             // we will also need to update the texture on the gpu too!
             this.updateCachedSpriteTexture();
 
@@ -705,7 +887,7 @@ PIXI.Graphics.prototype._renderWebGL = function(renderSession)
 
         if(this._mask)renderSession.maskManager.pushMask(this._mask, renderSession);
         if(this._filters)renderSession.filterManager.pushFilter(this._filterBlock);
-      
+
         // check blend mode
         if(this.blendMode !== renderSession.spriteBatch.currentBlendMode)
         {
@@ -713,16 +895,16 @@ PIXI.Graphics.prototype._renderWebGL = function(renderSession)
             var blendModeWebGL = PIXI.blendModesWebGL[renderSession.spriteBatch.currentBlendMode];
             renderSession.spriteBatch.gl.blendFunc(blendModeWebGL[0], blendModeWebGL[1]);
         }
-        
+
         // check if the webgl graphic needs to be updated
         if(this.webGLDirty)
         {
             this.dirty = true;
             this.webGLDirty = false;
         }
-        
+
         PIXI.WebGLGraphics.renderGraphics(this, renderSession);
-        
+
         // only render if it has children!
         if(this.children.length)
         {
@@ -739,7 +921,7 @@ PIXI.Graphics.prototype._renderWebGL = function(renderSession)
 
         if(this._filters)renderSession.filterManager.popFilter();
         if(this._mask)renderSession.maskManager.popMask(this.mask, renderSession);
-          
+
         renderSession.drawCount++;
 
         renderSession.spriteBatch.start();
@@ -750,20 +932,20 @@ PIXI.Graphics.prototype._renderWebGL = function(renderSession)
 * Renders the object using the Canvas renderer
 *
 * @method _renderCanvas
-* @param renderSession {RenderSession} 
+* @param renderSession {RenderSession}
 * @private
 */
 PIXI.Graphics.prototype._renderCanvas = function(renderSession)
 {
     // if the sprite is not visible or the alpha is 0 then no need to render this element
     if(this.visible === false || this.alpha === 0 || this.isMask === true)return;
-    
+
     if(this._cacheAsBitmap)
     {
         if(this.dirty || this.cachedSpriteDirty)
         {
             this._generateCachedSprite();
-   
+
             // we will also need to update the texture
             this.updateCachedSpriteTexture();
 
@@ -780,7 +962,7 @@ PIXI.Graphics.prototype._renderCanvas = function(renderSession)
     {
         var context = renderSession.context;
         var transform = this.worldTransform;
-        
+
         if(this.blendMode !== renderSession.currentBlendMode)
         {
             renderSession.currentBlendMode = this.blendMode;
@@ -916,7 +1098,7 @@ PIXI.Graphics.prototype.updateLocalBounds = function()
             var type = data.type;
             var lineWidth = data.lineWidth;
             shape = data.shape;
-           
+
 
             if(type === PIXI.Graphics.RECT || type === PIXI.Graphics.RREC)
             {
@@ -961,7 +1143,7 @@ PIXI.Graphics.prototype.updateLocalBounds = function()
             {
                 // POLY
                 points = shape.points;
-                
+
                 for (var j = 0; j < points.length; j+=2)
                 {
 
@@ -985,7 +1167,7 @@ PIXI.Graphics.prototype.updateLocalBounds = function()
     }
 
     var padding = this.boundsPadding;
-    
+
     this._localBounds.x = minX - padding;
     this._localBounds.width = (maxX - minX) + padding * 2;
 
@@ -1007,7 +1189,7 @@ PIXI.Graphics.prototype._generateCachedSprite = function()
     {
         var canvasBuffer = new PIXI.CanvasBuffer(bounds.width, bounds.height);
         var texture = PIXI.Texture.fromCanvas(canvasBuffer.canvas);
-        
+
         this._cachedSprite = new PIXI.Sprite(texture);
         this._cachedSprite.buffer = canvasBuffer;
 
@@ -1024,8 +1206,8 @@ PIXI.Graphics.prototype._generateCachedSprite = function()
 
    // this._cachedSprite.buffer.context.save();
     this._cachedSprite.buffer.context.translate(-bounds.x,-bounds.y);
-    
-    // make sure we set the alpha of the graphics to 1 for the render.. 
+
+    // make sure we set the alpha of the graphics to 1 for the render..
     this.worldAlpha = 1;
 
     // now render the graphic..
@@ -1088,10 +1270,10 @@ PIXI.Graphics.prototype.drawShape = function(shape)
 
     this.currentPath = null;
 
-    var data = new PIXI.GraphicsData(this.lineWidth, this.lineColor, this.lineAlpha, this.fillColor, this.fillAlpha, this.filling, shape);
-    
+    var data = new PIXI.GraphicsData(this.lineWidth, this.strokeStyle, this.fillStyle, this.filling, shape);
+
     this.graphicsData.push(data);
-    
+
     if(data.type === PIXI.Graphics.POLY)
     {
         data.shape.closed = this.filling;
@@ -1105,20 +1287,16 @@ PIXI.Graphics.prototype.drawShape = function(shape)
 
 /**
  * A GraphicsData object.
- * 
+ *
  * @class GraphicsData
  * @constructor
  */
-PIXI.GraphicsData = function(lineWidth, lineColor, lineAlpha, fillColor, fillAlpha, fill, shape)
+PIXI.GraphicsData = function(lineWidth, strokeStyle, fillStyle, fill, shape)
 {
     this.lineWidth = lineWidth;
-    this.lineColor = lineColor;
-    this.lineAlpha = lineAlpha;
-    this._lineTint = lineColor;
+    this.strokeStyle = strokeStyle;
 
-    this.fillColor = fillColor;
-    this.fillAlpha = fillAlpha;
-    this._fillTint = fillColor;
+    this.fillStyle = fillStyle;
     this.fill = fill;
 
     this.shape = shape;

@@ -6,7 +6,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-yuidoc');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    
+
     grunt.loadTasks('tasks');
 
     var srcFiles = [
@@ -49,13 +49,18 @@ module.exports = function(grunt) {
             '<%= dirs.src %>/renderers/webgl/utils/WebGLSpriteBatch.js',
             '<%= dirs.src %>/renderers/webgl/utils/WebGLFastSpriteBatch.js',
             '<%= dirs.src %>/renderers/webgl/utils/WebGLFilterManager.js',
-			'<%= dirs.src %>/renderers/webgl/utils/FilterTexture.js',
+            '<%= dirs.src %>/renderers/webgl/utils/FilterTexture.js',
             '<%= dirs.src %>/renderers/canvas/utils/CanvasBuffer.js',
             '<%= dirs.src %>/renderers/canvas/utils/CanvasMaskManager.js',
             '<%= dirs.src %>/renderers/canvas/utils/CanvasTinter.js',
             '<%= dirs.src %>/renderers/canvas/CanvasRenderer.js',
             '<%= dirs.src %>/renderers/canvas/CanvasGraphics.js',
             '<%= dirs.src %>/primitives/Graphics.js',
+            '<%= dirs.src %>/primitives/brushes/Brush.js',
+            '<%= dirs.src %>/primitives/brushes/LinearGradientBrush.js',
+            '<%= dirs.src %>/primitives/brushes/RadialGradientBrush.js',
+            '<%= dirs.src %>/primitives/brushes/SolidBrush.js',
+            '<%= dirs.src %>/primitives/brushes/TextureBrush.js',
             '<%= dirs.src %>/extras/Strip.js',
             '<%= dirs.src %>/extras/Rope.js',
             '<%= dirs.src %>/extras/TilingSprite.js',
@@ -222,6 +227,6 @@ module.exports = function(grunt) {
     grunt.registerTask('travis', ['build', 'test']);
 
     grunt.registerTask('default', ['build', 'test']);
-    
+
     grunt.registerTask('debug-watch', ['concat_sourcemap', 'watch:debug']);
 };
