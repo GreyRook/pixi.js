@@ -37,44 +37,28 @@ function TextureBrush(texture, transformMatrix, repeat)
      * @private
      */
     this._canvasBrush = null;
-
-    /**
-     * @member {number} the tint of the graphics. Will be assigned by CanvasGraphics
-     */
-    this.tint = 0xFFFFFF;
-
-    /**
-     * @member {number} the previous tint. Whent it !== tint, we need to regenerate _canvasBrush
-     * @private
-     */
-    this._prevTint = 0xFFFFFF;
-
 }
 
 TextureBrush.prototype = Object.create(Brush.prototype);
 TextureBrush.prototype.constructor = TextureBrush;
 
-/**
- * Returns the value that can be assigned to a context.fillStyle of StrokeStyle
+
+/*
+ * Generates _canvasBrush based on the tint color
  *
- * @return {CanvasPattern}
+ * @param tint {Number} the tint color
+ *
  */
-TextureBrush.prototype.getCanvasBrush = function (context)
+TextureBrush.prototype.setTint = function (tint)
 {
-    if (this.tint !== this._prevTint || this._canvasBrush === null)
+    if (this.texture.baseTexture.hasLoaded)
     {
-        if (this.texture.baseTexture.hasLoaded)
-        {
-            this._prevTint = this.tint;
+        var texture = (tint === 0xFFFFFF)
+            ? this.texture.baseTexture.source
+            : CanvasTinter.getTintedTexture({texture: this.texture}, tint);
 
-            var texture = (this.tint === 0xFFFFFF)
-                ? this.texture.baseTexture.source
-                : CanvasTinter.getTintedTexture({texture: this.texture}, this.tint);
-
-            this._canvasBrush = context.createPattern(texture, this.repeat ? 'repeat' : 'no-repeat');
-        }
+        this._canvasBrush = context.createPattern(texture, this.repeat ? 'repeat' : 'no-repeat');
     }
-    return this._canvasBrush;
 };
 
 /**
@@ -83,7 +67,7 @@ TextureBrush.prototype.getCanvasBrush = function (context)
  * @param context {CanvasRenderingContext2D}
  * @param worldAlpha {number}
  */
-TextureBrush.prototype.fillCanvas = function (context, worldAlpha)
+TextureBrush.prototype.fillCanvas = function (context)
 {
     if (this.transformMatrix !== Matrix.IDENTITY)
     {
@@ -94,8 +78,7 @@ TextureBrush.prototype.fillCanvas = function (context, worldAlpha)
         );
     }
 
-    context.globalAlpha = worldAlpha;
-    context.fillStyle = this.getCanvasBrush(context);
+    context.fillStyle = this._canvasBrush;
     context.fill();
 
     if (this.transformMatrix !== Matrix.IDENTITY)
@@ -111,7 +94,7 @@ TextureBrush.prototype.fillCanvas = function (context, worldAlpha)
  * @param context {CanvasRenderingContext2D}
  * @param worldAlpha {number}
  */
-TextureBrush.prototype.strokeCanvas = function (context, worldAlpha)
+TextureBrush.prototype.strokeCanvas = function (context)
 {
     if (this.transformMatrix !== Matrix.IDENTITY)
     {
@@ -122,8 +105,7 @@ TextureBrush.prototype.strokeCanvas = function (context, worldAlpha)
         );
     }
 
-    context.globalAlpha = worldAlpha;
-    context.strokeStyle = this.getCanvasBrush(context);
+    context.strokeStyle = this._canvasBrush;
     context.stroke();
 
     if (this.transformMatrix !== Matrix.IDENTITY)
